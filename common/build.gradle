@@ -1,3 +1,7 @@
+plugins {
+    id 'fabric-loom' version '0.12-SNAPSHOT'
+}
+
 repositories {
     maven {
         url = "https://jitpack.io"

@@ -1,11 +1,10 @@
-package org.samo_lego.simpleauth.utils.fabric;
+package org.samo_lego.simpleauth.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
-import org.samo_lego.simpleauth.utils.CarpetHelper;
-import org.samo_lego.simpleauth.utils.SReplayHelper;
+import org.samo_lego.simpleauth.SimpleAuth;
 
-public class PlatformSpecificImpl {
+public class PlatformSpecific {
     /**
      * Checks if player is actually a fake one.
      *
@@ -13,7 +12,8 @@ public class PlatformSpecificImpl {
      * @return true if it's fake, otherwise false
      */
     public static boolean isPlayerFake(PlayerEntity player) {
-        return isCarpetFake(player) || isSReplayFake(player);
+        boolean isFake = isCarpetFake(player) || isSReplayFake(player);
+        return isFake;
     }
 
     private static boolean isCarpetFake(PlayerEntity player) {

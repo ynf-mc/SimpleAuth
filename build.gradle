@@ -1,54 +1,68 @@
-buildscript {
-    repositories {
-        maven { url "https://maven.shedaniel.me/" }
-    }
-
-    dependencies {
-        classpath 'com.netflix.nebula:gradle-aggregate-javadocs-plugin:2.2.+'
-    }
-}
-
-
 plugins {
-    id "architectury-plugin" version "3.0.94"
-    id "forgified-fabric-loom" version "0.6.72" apply false
+    id 'fabric-loom' version '0.12-SNAPSHOT'
 }
 
-
-architectury {
-    minecraft = rootProject.minecraft_version
-}
-
-subprojects {
-    apply plugin: "forgified-fabric-loom"
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
+repositories {
+    // Carpet mod
+    maven {
+        url 'https://jitpack.io'
+    }
+    maven {
+        url 'https://masa.dy.fi/maven'
     }
 }
-apply plugin: 'nebula-aggregate-javadocs'
 
-allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
+loom {
+    accessWidenerPath = file("src/main/resources/simpleauth.accesswidener")
+}
 
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
-    group = rootProject.maven_group
+configurations {
+    shadow
+}
 
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
-        // The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-        // JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-        // We'll use that if it's available, but otherwise we'll use the older option.
-        def targetVersion = 8
-        if (JavaVersion.current().isJava9Compatible()) {
-            options.release = targetVersion
-        }
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
+
+    // carpetMod
+    // from masa's maven
+    //modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+    // jitpack for quicker updating
+    modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+    modImplementation "com.github.ynf-mc:SReplay:387a2cd07d"
+
+    // Password hashing
+    // Argon2
+    implementation "de.mkammerer:argon2-jvm:${argon2_version}"
+    include "de.mkammerer:argon2-jvm:${argon2_version}"
+
+    // BCrypt
+    implementation "at.favre.lib:bcrypt:${bcrypt_version}"
+    implementation "at.favre.lib:bytes:${bytes_version}"
+    include "at.favre.lib:bcrypt:${bcrypt_version}"
+    include "at.favre.lib:bytes:${bytes_version}"
+
+    // Storage
+    // LevelDB database
+    implementation 'org.iq80.leveldb:leveldb:0.12'
+    implementation 'org.iq80.leveldb:leveldb-api:0.12'
+    include 'org.iq80.leveldb:leveldb:0.12'
+    include 'org.iq80.leveldb:leveldb-api:0.12'
+
+    // MongoDB driver
+    implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
+    include 'org.mongodb:mongodb-driver-sync:4.1.0'
+
+    // JNA lib
+    include 'net.java.dev.jna:jna:5.5.0'
+}
+
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand "version": project.mod_version
     }
-
-    java {
-        withSourcesJar()
-    }
+    inputs.property "version", project.mod_version
 }
